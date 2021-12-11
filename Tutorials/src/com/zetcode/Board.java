@@ -21,12 +21,14 @@ public class Board extends JPanel
     private final int B_HEIGHT = 500;
     private final int INITIAL_X = -40;
     private final int INITIAL_Y = -40;
-    private final int DELAY = 1;
+    private final int DELAY = 100;
 
     private Image star;
     private Timer timer;
     private int x, y;
-
+    private long[] lastTime = new long[10];
+    private long previousTimeStamp = System.currentTimeMillis();
+    private int lastTimeCounter = 0;
     public Board() {
 
         initBoard();
@@ -55,8 +57,22 @@ public class Board extends JPanel
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         drawStar(g);
+        long currentTime = System.currentTimeMillis();
+        System.out.println(currentTime - previousTimeStamp);
+        lastTime[lastTimeCounter] = currentTime - previousTimeStamp;
+        previousTimeStamp = System.currentTimeMillis();
+        lastTimeCounter++;
+        if (lastTimeCounter == 10) {
+        	lastTimeCounter = 0;
+        }
+        double sum = 0;
+        for (long period : lastTime) {
+        	sum += (period-DELAY);
+        }
+        int averagePeriodError = (int) (sum/10.0);
+        
+        timer.setDelay(DELAY-averagePeriodError);
     }
 
     private void drawStar(Graphics g) {
