@@ -12,8 +12,8 @@ public class Player {
 	private boolean goalPositionChanged = false;
 	private double maximumSpeed; //m/s
 	private double runningSpeed; //m/s
-	private double acceleration; //m/s/s
-	private double deceleration; //m/s/s
+	private double maxAcceleration; //m/s/s
+	private double maxDeceleration; //m/s/s
 	private double velocityX; //m/s
 	private double velocityY; //m/s
 	private Position previousPosition = new Position(0, 0);
@@ -30,8 +30,8 @@ public class Player {
 		this.currentPosition = initialPosition;
 		this.maximumSpeed = maximumSpeed;
 		this.runningSpeed = runningSpeed;
-		this.acceleration = acceleration;
-		this.deceleration = deceleration;
+		this.maxAcceleration = acceleration;
+		this.maxDeceleration = deceleration;
 	}
 	
 	public void update() {
@@ -63,7 +63,7 @@ public class Player {
 			} else { //running at final point
 				vix = 0;
 				viy = 0;
-				double a = acceleration;
+				double a = maxAcceleration;
 				if (initialSpeedEnum == FinalSpeedEnum.Stationary) {
 					vix = 0;
 					viy = 0;
@@ -76,6 +76,12 @@ public class Player {
 					//x=v_i*t+0.5*a*t^2 -> (x-v_ix*t)/(0.5*t^2)
 					ax = (x-vix*t)/(0.5*Math.pow(t, 2));
 					ay = (y-viy*t)/(0.5*Math.pow(t, 2));
+					a = Math.sqrt(Math.pow(ax, 2) + Math.pow(ay, 2));
+					if (a > maxAcceleration) {
+						//account for maximum acceleration
+						ax = ax * maxAcceleration / a;
+						ay = ay * maxAcceleration / a;
+					}
 				}
 			}
 			t = 0;

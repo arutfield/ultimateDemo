@@ -114,7 +114,43 @@ public class PlayerTests {
 		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
 	}
 	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYDesiredTime() {
+		Player player = createPlayer();
+		player.setGoalState(new GoalState(new Position(5, 5), FinalSpeedEnum.Running, 5));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = 0.5*0.4*0.1*0.1;
+		double goalX = 0.5*0.4*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
 	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYMaxAcceleration() {
+		Player player = createPlayer();
+		player.setGoalState(new GoalState(new Position(5e5, 5e5), FinalSpeedEnum.Running, 1));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = 0.5*maxAcceleration*Math.sin(45.0 * Math.PI / 180.0)*0.1*0.1;
+		double goalX = 0.5*maxAcceleration*Math.cos(45.0 * Math.PI / 180.0)*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
 
-	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYMaxAccelerationAllSteps() {
+		Player player = createPlayer();
+		player.setGoalState(new GoalState(new Position(5e5, 5e5), FinalSpeedEnum.Running, 1));
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		for (double i=0.1; i < 1000; i = i+0.1) {
+			player.update();		
+			double goalY = 0.5*maxAcceleration*Math.sin(45.0 * Math.PI / 180.0)*i*i;
+			double goalX = 0.5*maxAcceleration*Math.cos(45.0 * Math.PI / 180.0)*i*i;
+			assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+			assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+		}
+	}
 }
