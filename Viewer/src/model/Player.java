@@ -6,7 +6,7 @@ import utilities.Position;
 public class Player {
 	
 	private final static double intervalPeriodMilliseconds = 100.0;
-	private Position currentPosition;
+	private Position currentPosition = new Position(0, 0);
 	private Position goalPosition;
 	private boolean goalPositionChanged = false;
 	private double maximumSpeed; //m/s
@@ -15,9 +15,9 @@ public class Player {
 	private double deceleration; //m/s/s
 	private double velocityX; //m/s
 	private double velocityY; //m/s
-	private Position previousPosition;
-	private FinalSpeedEnum currentSpeedEnum;
-	private FinalSpeedEnum finalSpeedEnum; 
+	private Position previousPosition = new Position(0, 0);
+	private FinalSpeedEnum initialSpeedEnum = FinalSpeedEnum.Stationary;
+	private FinalSpeedEnum finalSpeedEnum = FinalSpeedEnum.Stationary; 
 	
 	//for knowing current position
 	double t;
@@ -50,7 +50,7 @@ public class Player {
 				//not moving at goal, vf=0
 				vfx = 0;
 				vfy = 0;
-				if (currentSpeedEnum == FinalSpeedEnum.Running) {
+				if (initialSpeedEnum == FinalSpeedEnum.Running) {
 					//currently running, use deceleration to stop
 					double d = Math.sqrt(Math.pow(x,  2) + Math.pow(y, 2));
 					double vi = Math.sqrt(Math.pow(vix, 2) + Math.pow(viy, 2));
@@ -60,8 +60,22 @@ public class Player {
 					ax = (x - vix*t)*2.0/(Math.pow(t, 2));
 					ay = (y - viy*t)*2.0/(Math.pow(t, 2));
 				}
-			} else {
-				
+			} else { //running at final point
+				vix = 0;
+				viy = 0;
+				double a = acceleration;
+				if (initialSpeedEnum == FinalSpeedEnum.Stationary) {
+					vix = 0;
+					viy = 0;
+					double d = Math.sqrt(Math.pow(x, 2) + Math.pow(y,  2));
+					double t = Math.sqrt(d*2.0/a);
+					vfx = x * 2.0 / t - vix;
+					vfy = y * 2.0 / t - viy;
+					//v^2=vi^2 + 2*a*x
+					//x=v_i*t+0.5*a*t^2 -> (x-v_ix*t)/(0.5*t^2)
+					ax = (x-vix*t)/(0.5*Math.pow(t, 2));
+					ay = (y-viy*t)/(0.5*Math.pow(t, 2));
+				}
 			}
 			t = 0;
 		}
@@ -73,11 +87,6 @@ public class Player {
 		velocityX = (currentPosition.getX() - previousPosition.getX()) * intervalPeriodMilliseconds / 1000.0;
 		velocityY = (currentPosition.getY() - previousPosition.getY()) * intervalPeriodMilliseconds / 1000.0;;
 		previousPosition = currentPosition;
-		if (Math.abs(velocityX) > 0 || Math.abs(velocityY) > 0) {
-			currentSpeedEnum = FinalSpeedEnum.Running;
-		} else {
-			currentSpeedEnum = FinalSpeedEnum.Stationary;
-		}
 		
 	}
 
@@ -89,5 +98,6 @@ public class Player {
 		this.goalPosition = goalPosition;
 		finalSpeedEnum = finalSpeed;
 		goalPositionChanged = true;
+		update();
 	}
 }

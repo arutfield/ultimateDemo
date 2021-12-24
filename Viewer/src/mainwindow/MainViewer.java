@@ -85,7 +85,7 @@ public class MainViewer extends JPanel implements ActionListener {
 		for (Player player : playerMap.values()) {
 			player.update();
 			Position position = player.getCurrentPosition();
-			Shape circle = new Ellipse2D.Float(position.getX(), position.getY(), 10.0f, 10.0f);
+			Shape circle = new Ellipse2D.Float((int) position.getX(), (int) position.getY(), 10.0f, 10.0f);
 			ga.draw(circle);
 			ga.setPaint(Color.green);
 			ga.fill(circle);
