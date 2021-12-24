@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import model.Player;
 import utilities.FinalSpeedEnum;
+import utilities.GoalState;
 import utilities.Position;
 
 public class PlayerTests {
@@ -37,7 +38,7 @@ public class PlayerTests {
 	@Test
 	public void testGoalPositionFirstUpdateInitialToRunningX() {
 		Player player = createPlayer();
-		player.setGoalState(new Position(5, 0), FinalSpeedEnum.Running);
+		player.setGoalState(new GoalState(new Position(5, 0), FinalSpeedEnum.Running));
 		player.update();
 		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
 		
@@ -50,7 +51,7 @@ public class PlayerTests {
 	@Test
 	public void testGoalPositionFirstUpdateInitialToRunningY() {
 		Player player = createPlayer();
-		player.setGoalState(new Position(0, 5), FinalSpeedEnum.Running);
+		player.setGoalState(new GoalState(new Position(0, 5), FinalSpeedEnum.Running));
 		player.update();
 		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
 		
@@ -60,4 +61,60 @@ public class PlayerTests {
 		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
 	}
 
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningNegativeX() {
+		Player player = createPlayer();
+		player.setGoalState(new GoalState(new Position(-5, 0), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalX = -0.5*maxAcceleration*0.1*0.1;
+		double goalY = 0;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningNegativeY() {
+		Player player = createPlayer();
+		player.setGoalState(new GoalState(new Position(0, -5), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = -0.5*maxAcceleration*0.1*0.1;
+		double goalX = 0;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXY() {
+		Player player = createPlayer();
+		player.setGoalState(new GoalState(new Position(5, 5), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = 0.5*maxAcceleration*Math.sin(45.0 * Math.PI / 180.0)*0.1*0.1;
+		double goalX = 0.5*maxAcceleration*Math.cos(45.0 * Math.PI / 180.0)*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningNegativeXY() {
+		Player player = createPlayer();
+		player.setGoalState(new GoalState(new Position(-5, -5), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = -0.5*maxAcceleration*Math.sin(45.0 * Math.PI / 180.0)*0.1*0.1;
+		double goalX = -0.5*maxAcceleration*Math.cos(45.0 * Math.PI / 180.0)*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+	
+	
+
+	
 }

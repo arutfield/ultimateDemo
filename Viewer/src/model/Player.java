@@ -1,13 +1,14 @@
 package model;
 
 import utilities.FinalSpeedEnum;
+import utilities.GoalState;
 import utilities.Position;
 
 public class Player {
 	
 	private final static double intervalPeriodMilliseconds = 100.0;
 	private Position currentPosition = new Position(0, 0);
-	private Position goalPosition;
+	private GoalState goalState;
 	private boolean goalPositionChanged = false;
 	private double maximumSpeed; //m/s
 	private double runningSpeed; //m/s
@@ -17,7 +18,6 @@ public class Player {
 	private double velocityY; //m/s
 	private Position previousPosition = new Position(0, 0);
 	private FinalSpeedEnum initialSpeedEnum = FinalSpeedEnum.Stationary;
-	private FinalSpeedEnum finalSpeedEnum = FinalSpeedEnum.Stationary; 
 	
 	//for knowing current position
 	double t;
@@ -43,10 +43,10 @@ public class Player {
 			double vfy;
 			vix = velocityX;
 			viy = velocityY;
-			double x = goalPosition.getX() - currentPosition.getX();
-			double y = goalPosition.getY() - currentPosition.getY();
+			double x = goalState.getPosition().getX() - currentPosition.getX();
+			double y = goalState.getPosition().getY() - currentPosition.getY();
 			//kinematic equations for getting to goal asap
-			if (finalSpeedEnum == FinalSpeedEnum.Stationary) {
+			if (goalState.getFinalSpeedEnum() == FinalSpeedEnum.Stationary) {
 				//not moving at goal, vf=0
 				vfx = 0;
 				vfy = 0;
@@ -55,7 +55,7 @@ public class Player {
 					double d = Math.sqrt(Math.pow(x,  2) + Math.pow(y, 2));
 					double vi = Math.sqrt(Math.pow(vix, 2) + Math.pow(viy, 2));
 					double vf = Math.sqrt(Math.pow(vfx,  2) + Math.pow(vfy, 2));
-					double t = (2 * d)/(vf + vi);
+					double t = goalState.getDesiredTime() == -1 ? (2 * d)/(vf + vi) : goalState.getDesiredTime();
 					//magnitude equations are done, break up into x and y
 					ax = (x - vix*t)*2.0/(Math.pow(t, 2));
 					ay = (y - viy*t)*2.0/(Math.pow(t, 2));
@@ -68,7 +68,8 @@ public class Player {
 					vix = 0;
 					viy = 0;
 					double d = Math.sqrt(Math.pow(x, 2) + Math.pow(y,  2));
-					double t = Math.sqrt(d*2.0/a);
+					double t = goalState.getDesiredTime() == -1 ?
+							Math.sqrt(d*2.0/a) : goalState.getDesiredTime();
 					vfx = x * 2.0 / t - vix;
 					vfy = y * 2.0 / t - viy;
 					//v^2=vi^2 + 2*a*x
@@ -94,10 +95,11 @@ public class Player {
 		return currentPosition;
 	}
 	
-	public void setGoalState(Position goalPosition, FinalSpeedEnum finalSpeed) {
-		this.goalPosition = goalPosition;
-		finalSpeedEnum = finalSpeed;
+	public void setGoalState(GoalState goalState) {
+		this.goalState = goalState;
 		goalPositionChanged = true;
 		update();
 	}
+
+
 }
