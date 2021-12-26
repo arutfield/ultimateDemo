@@ -15,11 +15,18 @@ public class PlayerTests {
 	double runningSpeed = 8;
 	double maxAcceleration = 10;
 	double maxDeceleration = 15;
+	double initialOffsetX = 3.2;
+	double initialOffsetY = -2.5;
 
 	private Player createPlayer() {
 		double x = 0.0;
 		double y = 0.0;
 		Position initialPosition = new Position(x, y);
+		return new Player(initialPosition, runningSpeed, maxSpeed, maxAcceleration, maxDeceleration);
+	}
+	
+	private Player createPlayerOffset() {
+		Position initialPosition = new Position(initialOffsetX, initialOffsetY);
 		return new Player(initialPosition, runningSpeed, maxSpeed, maxAcceleration, maxDeceleration);
 	}
 	
@@ -188,4 +195,174 @@ public class PlayerTests {
 		}
 	}
 
+	//player stationary to running with initial offset
+	@Test
+	public void testInitialPositionOffset() {
+		Player player = createPlayerOffset();
+		assertEquals(player.getCurrentPosition().getX(), initialOffsetX, 1e-5);
+		assertEquals(player.getCurrentPosition().getY(), initialOffsetY, 1e-5);
+	}
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(5, initialOffsetY), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalX = initialOffsetX + 0.5*maxAcceleration*0.1*0.1;
+		double goalY = initialOffsetY;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningYOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(initialOffsetX, 5), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = initialOffsetY + 0.5*maxAcceleration*0.1*0.1;
+		double goalX = initialOffsetX;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningNegativeXOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(-5, initialOffsetY), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalX = initialOffsetX-0.5*maxAcceleration*0.1*0.1;
+		double goalY = initialOffsetY;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningNegativeYOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(initialOffsetX, -5), FinalSpeedEnum.Running));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = initialOffsetY-0.5*maxAcceleration*0.1*0.1;
+		double goalX = initialOffsetX;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(5, 5), FinalSpeedEnum.Running));
+		double angle = Math.atan((5-initialOffsetY)/(5 - initialOffsetX));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = initialOffsetY + 0.5*maxAcceleration*Math.sin(angle)*0.1*0.1;
+		double goalX = initialOffsetX + 0.5*maxAcceleration*Math.cos(angle)*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningNegativeXYOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(-5, -5), FinalSpeedEnum.Running));
+		double angle = Math.atan((-5 - initialOffsetY)/(-5 - initialOffsetX));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = initialOffsetY-0.5*maxAcceleration*Math.sin(angle)*0.1*0.1;
+		double goalX = initialOffsetX-0.5*maxAcceleration*Math.cos(angle)*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYDesiredTimeOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(5, 5), FinalSpeedEnum.Running, 5));
+		double angle = Math.atan((5 - initialOffsetY)/(5 - initialOffsetX));
+		double distance = Math.sqrt(Math.pow(5 - initialOffsetX, 2) + Math.pow(5 - initialOffsetY, 2));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		double acceleration = distance/0.5/5/5;
+		
+		double goalY = initialOffsetY + 0.5*acceleration*Math.sin(angle)*0.1*0.1;
+		double goalX = initialOffsetX + 0.5*acceleration*Math.cos(angle)*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYMaxAccelerationOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(5e5, 5e5), FinalSpeedEnum.Running, 1));
+		double angle = Math.atan((5e5 - initialOffsetY)/(5e5 - initialOffsetX));
+		player.update();
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		
+		double goalY = initialOffsetY + 0.5*maxAcceleration*Math.sin(angle)*0.1*0.1;
+		double goalX = initialOffsetX + 0.5*maxAcceleration*Math.cos(angle)*0.1*0.1;
+		assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+		assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+	}
+
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYMaxAccelerationAllStepsOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(5e4, 5e4), FinalSpeedEnum.Running, 1));
+		double angle = Math.atan((5e4 - initialOffsetY)/(5e4 - initialOffsetX));
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		//v^2 = v0^2+2ax
+		double distanceBeforeMaxSpeed = (Math.pow(maxSpeed, 2))/(2*maxAcceleration);
+		double timeBeforeMaxSpeed = maxSpeed / maxAcceleration;
+		for (double i=0.1; i < 1000; i = i+0.1) {
+			player.update();
+			
+			double goalY = initialOffsetY + 0.5*maxAcceleration*Math.sin(angle)*i*i;
+			double goalX = initialOffsetX + 0.5*maxAcceleration*Math.cos(angle)*i*i;
+			if (Math.sqrt(Math.pow(goalX-initialOffsetX, 2) + Math.pow(goalY-initialOffsetY, 2)) > distanceBeforeMaxSpeed) {
+				goalX = initialOffsetX + (distanceBeforeMaxSpeed + (i - timeBeforeMaxSpeed)*maxSpeed) * Math.cos(angle);
+				goalY = initialOffsetY + (distanceBeforeMaxSpeed + (i - timeBeforeMaxSpeed)*maxSpeed) * Math.sin(angle);
+			}
+			System.out.println("goalX: " + goalX);
+			assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+			assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+		}
+	}
+	
+	@Test
+	public void testGoalPositionFirstUpdateInitialToRunningXYMaxAccelerationAllStepsLongTriangleOffset() {
+		Player player = createPlayerOffset();
+		player.setGoalState(new GoalState(new Position(1e4, 5e4), FinalSpeedEnum.Running, 1));
+		double angle=Math.atan((5e4-initialOffsetY)/(1e4-initialOffsetX));
+		
+		//kinematic equation: x=v_0x*t+0.5*a_x*t^2
+		//v^2 = v0^2+2ax
+		double distanceBeforeMaxSpeed = (Math.pow(maxSpeed, 2))/(2*maxAcceleration);
+		double timeBeforeMaxSpeed = maxSpeed / maxAcceleration;
+		for (double i=0.1; i < 1000; i = i+0.1) {
+			player.update();
+			
+			double goalX = initialOffsetX + 0.5*maxAcceleration*Math.cos(angle)*i*i;
+			double goalY = initialOffsetY + 0.5*maxAcceleration*Math.sin(angle)*i*i;
+			if (Math.sqrt(Math.pow(goalX-initialOffsetX, 2) + Math.pow(goalY-initialOffsetY, 2)) > distanceBeforeMaxSpeed) {
+				goalX = initialOffsetX + (distanceBeforeMaxSpeed + (i - timeBeforeMaxSpeed)*maxSpeed) * Math.cos(angle);
+				goalY = initialOffsetY + (distanceBeforeMaxSpeed + (i - timeBeforeMaxSpeed)*maxSpeed) * Math.sin(angle);
+			}
+			System.out.println("goalX: " + goalX);
+			assertEquals(goalX, player.getCurrentPosition().getX(), 1e-5);
+			assertEquals(goalY, player.getCurrentPosition().getY(), 1e-5);
+		}
+	}
+
+	
+	
 }

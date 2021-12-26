@@ -25,6 +25,8 @@ public class Player {
 	double ay;
 	double vix;
 	double viy;
+	double dix;
+	double diy;
 
 	public Player(Position initialPosition, double runningSpeed, double maximumVelocity, double acceleration,
 			double deceleration) {
@@ -41,11 +43,13 @@ public class Player {
 		if (goalPositionChanged) {
 			goalPositionChanged = false;
 			t = 0;
+			vix = velocityX;
+			viy = velocityY;
+			dix = currentPosition.getX();
+			diy = currentPosition.getY();
 		}
 		double vfx;
 		double vfy;
-		vix = velocityX;
-		viy = velocityY;
 		double x = goalState.getPosition().getX() - currentPosition.getX();
 		double y = goalState.getPosition().getY() - currentPosition.getY();
 		// kinematic equations for getting to goal asap
@@ -109,8 +113,8 @@ public class Player {
 			ay = 0;
 
 		}
-		currentPosition = new Position(dxBeforeMaxSpeed + vix * t + 0.5 * ax * Math.pow(t, 2) + dxConstantSpeed,
-				dyBeforeMaxSpeed + viy * t + 0.5 * ay * Math.pow(t, 2) + dyConstantSpeed);
+		currentPosition = new Position(dix + dxBeforeMaxSpeed + vix * t + 0.5 * ax * Math.pow(t, 2) + dxConstantSpeed,
+				diy + dyBeforeMaxSpeed + viy * t + 0.5 * ay * Math.pow(t, 2) + dyConstantSpeed);
 	}
 
 	private void updateVelocity() {
