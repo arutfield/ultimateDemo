@@ -15,18 +15,16 @@ public class CurrentState {
 	public double getVelocityX() {
 		return velocityX;
 	}
-	public void setVelocityX(double velocityX) {
-		this.velocityX = velocityX;
-	}
 	public double getVelocityY() {
 		return velocityY;
-	}
-	public void setVelocityY(double velocityY) {
-		this.velocityY = velocityY;
 	}
 	
 	public double getVelocity() {
 		return Math.sqrt(Math.pow(velocityX, 2) + Math.pow(velocityY, 2));
+	}
+	public void setVelocity(double vx, double vy) {
+		velocityX = vx;
+		velocityY = vy;
 	}
 	
 
